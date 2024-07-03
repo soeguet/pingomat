@@ -9,6 +9,16 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
+var internalIP string = "192.168.178.1"
+
+func (a *App) setInternalIP(newIP string) {
+	internalIP = newIP
+}
+
+func (a *App) getInternalIP() string {
+	return internalIP
+}
+
 // App struct
 type App struct {
 	ctx context.Context
@@ -16,8 +26,9 @@ type App struct {
 
 // PingResult struct
 type PingResult struct {
-	Success bool   `json:"success"`
-	Output  string `json:"output"`
+	InternalIP string `json:"internalIP"`
+	Output     string `json:"output"`
+	Success    bool   `json:"success"`
 }
 
 // NewApp creates a new App application struct
@@ -25,19 +36,18 @@ func NewApp() *App {
 	return &App{}
 }
 
-// startup is called when the app starts. The context is saved
-// so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+
+	// call the ping function to get the internal IP at startup
 	go a.startPinging(ctx)
 }
 
-// startPinging sends a ping every 30 seconds
 func (a *App) startPinging(ctx context.Context) {
 	for {
-		pingResult := a.ping("192.168.178.1") // Replace with your internal IP
+		pingResult := a.ping(internalIP)
 		runtime.EventsEmit(ctx, "pingResult", pingResult)
-		time.Sleep(30 * time.Second)
+		time.Sleep(3 * time.Second)
 	}
 }
 
@@ -46,13 +56,15 @@ func (a *App) ping(ip string) PingResult {
 	out, err := exec.Command("ping", "-c", "1", ip).Output()
 	if err != nil {
 		return PingResult{
-			Success: false,
-			Output:  fmt.Sprintf("Error: %s", err),
+			InternalIP: internalIP,
+			Success:    false,
+			Output:     fmt.Sprintf("Error: %s", err),
 		}
 	}
 	return PingResult{
-		Success: true,
-		Output:  string(out),
+		InternalIP: internalIP,
+		Success:    true,
+		Output:     string(out),
 	}
 }
 

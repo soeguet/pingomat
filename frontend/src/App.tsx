@@ -1,5 +1,5 @@
 import "./App.css";
-import PingComponent from "./components/PingComponent";
+import { PingComponent } from "./components/PingComponent";
 
 function App() {
 	return (
