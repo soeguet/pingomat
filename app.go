@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"strings"
+	"syscall"
 	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -64,38 +66,42 @@ func (a *App) startPinging(ctx context.Context) {
 	time.Sleep(3 * time.Second)
 
 	// Initial request
-	pingResult := a.ping(internalIP)
+	pingResult := a.ping()
 	runtime.EventsEmit(ctx, "pingResult", pingResult)
 
-	// Repeated requests
+	// Repeated request
 	for {
 		select {
 		case <-ctx.Done():
 			// ext is done, exit the goroutine
 			return
 		case <-time.After(30 * time.Second):
-			pingResult := a.ping(internalIP)
+			pingResult := a.ping()
 			runtime.EventsEmit(ctx, "pingResult", pingResult)
 		}
 	}
 }
 
 // ping executes the ping command and returns the output
-func (a *App) ping(ip string) PingResult {
-	out, err := exec.Command("ping", "-c", "1", ip).Output()
-	if err != nil {
+func (a *App) ping() PingResult {
+	cmd := exec.Command("ping", "-n", "1", internalIP)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true} // headless mode
+
+	out, err := cmd.Output()
+	output := string(out)
+	if err != nil || strings.Contains(output, "Zielhost nicht erreichbar") {
 		return PingResult{
 			Time:       a.getTimeHHMMSS(),
 			InternalIP: internalIP,
 			Success:    false,
-			Output:     fmt.Sprintf("Error: %s", err),
+			Output:     output,
 		}
 	}
 	return PingResult{
 		Time:       a.getTimeHHMMSS(),
 		InternalIP: internalIP,
 		Success:    true,
-		Output:     string(out),
+		Output:     output,
 	}
 }
 
