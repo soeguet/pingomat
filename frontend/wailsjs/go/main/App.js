@@ -6,10 +6,26 @@ export function GetInternalIP() {
   return window['go']['main']['App']['GetInternalIP']();
 }
 
-export function Greet(arg1) {
-  return window['go']['main']['App']['Greet'](arg1);
+export function GetPingCount() {
+  return window['go']['main']['App']['GetPingCount']();
+}
+
+export function MakeWindowsTaskIconFlash(arg1) {
+  return window['go']['main']['App']['MakeWindowsTaskIconFlash'](arg1);
+}
+
+export function SendDesktopNotification(arg1, arg2) {
+  return window['go']['main']['App']['SendDesktopNotification'](arg1, arg2);
+}
+
+export function SendManualPing() {
+  return window['go']['main']['App']['SendManualPing']();
 }
 
 export function SetInternalIP(arg1) {
   return window['go']['main']['App']['SetInternalIP'](arg1);
+}
+
+export function SetPingCount(arg1) {
+  return window['go']['main']['App']['SetPingCount'](arg1);
 }

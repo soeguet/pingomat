@@ -4,14 +4,31 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	goruntime "runtime"
 	"strings"
-	"syscall"
 	"time"
 
+	"github.com/gen2brain/beeep"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-var internalIP string = "192.168.178.1"
+const (
+	ERROR_TEXT = "Zielhost nicht erreichbar"
+)
+
+var (
+	internalIP string = "192.168.178.1"
+	pingCount  int    = 30
+	myCtx      context.Context
+)
+
+func (a *App) SetPingCount(newPingCount int) {
+	pingCount = newPingCount
+}
+
+func (a *App) GetPingCount() int {
+	return pingCount
+}
 
 func (a *App) SetInternalIP(newIP string) {
 	internalIP = newIP
@@ -45,23 +62,18 @@ func (a *App) getTimeHHMMSS() string {
 }
 
 func (a *App) startup(ctx context.Context) {
+	myCtx = ctx
 	a.ctx = ctx
 
 	// call the ping function to get the internal IP at startup
 	go a.startPinging(ctx)
 }
 
-func (a *App) startPinging(ctx context.Context) {
-	defer func() {
-		runtime.EventsEmit(ctx, "pingResult", PingResult{
-			Time:       a.getTimeHHMMSS(),
-			InternalIP: internalIP,
-			Success:    false,
-			Output:     "Ping routine stopped",
-		})
-		fmt.Println("Stopping pinging routine")
-	}()
+func (a *App) SendDesktopNotification(title string, body string) {
+	beeep.Notify(title, body, "")
+}
 
+func (a *App) startPinging(ctx context.Context) {
 	// Initial delay of 3 seconds
 	time.Sleep(3 * time.Second)
 
@@ -69,11 +81,10 @@ func (a *App) startPinging(ctx context.Context) {
 	pingResult := a.ping()
 	runtime.EventsEmit(ctx, "pingResult", pingResult)
 
-	// Repeated request
 	for {
 		select {
 		case <-ctx.Done():
-			// ext is done, exit the goroutine
+			// Context is done, exit the goroutine
 			return
 		case <-time.After(30 * time.Second):
 			pingResult := a.ping()
@@ -82,30 +93,38 @@ func (a *App) startPinging(ctx context.Context) {
 	}
 }
 
-// ping executes the ping command and returns the output
-func (a *App) ping() PingResult {
-	cmd := exec.Command("ping", "-n", "1", internalIP)
-	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true} // headless mode
+func (a *App) SendManualPing() {
+	go func() {
+		pingResult := a.ping()
+		runtime.EventsEmit(a.ctx, "pingResult", pingResult)
+	}()
+}
 
+func preparePingCommand(internalIP string) *exec.Cmd {
+	os := goruntime.GOOS
+	if os == "windows" {
+		return exec.Command("ping", "-n", "1", "-w", "250", internalIP)
+	} else {
+		// unix
+		return exec.Command("ping", "-c", "1", "-W", "0.25", internalIP)
+	}
+}
+
+func (a *App) ping() PingResult {
+	cmd := preparePingCommand(internalIP)
 	out, err := cmd.Output()
 	output := string(out)
-	if err != nil || strings.Contains(output, "Zielhost nicht erreichbar") {
-		return PingResult{
-			Time:       a.getTimeHHMMSS(),
-			InternalIP: internalIP,
-			Success:    false,
-			Output:     output,
-		}
-	}
+
+	status := err == nil && !strings.Contains(output, ERROR_TEXT)
+
 	return PingResult{
 		Time:       a.getTimeHHMMSS(),
 		InternalIP: internalIP,
-		Success:    true,
+		Success:    status,
 		Output:     output,
 	}
 }
 
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
+func (a *App) MakeWindowsTaskIconFlash(title string) {
+	_ = FlashWindow(title)
 }

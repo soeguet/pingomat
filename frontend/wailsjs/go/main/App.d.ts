@@ -3,6 +3,14 @@
 
 export function GetInternalIP():Promise<string>;
 
-export function Greet(arg1:string):Promise<string>;
+export function GetPingCount():Promise<number>;
+
+export function MakeWindowsTaskIconFlash(arg1:string):Promise<void>;
+
+export function SendDesktopNotification(arg1:string,arg2:string):Promise<void>;
+
+export function SendManualPing():Promise<void>;
 
 export function SetInternalIP(arg1:string):Promise<void>;
+
+export function SetPingCount(arg1:number):Promise<void>;
