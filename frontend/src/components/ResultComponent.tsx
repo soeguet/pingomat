@@ -1,8 +1,10 @@
 import type { PingResult } from "./PingComponent";
 
 type ResultComponentProps = {
-	pingResults: PingResult[];
+	pingResults: PingResult[] | null;
+	lastPingResult: PingResult | null;
 };
+
 function ResultComponent(props: ResultComponentProps) {
 	return (
 		<>
@@ -11,9 +13,25 @@ function ResultComponent(props: ResultComponentProps) {
 					id="ping-output"
 					className="h-[20rem] min-h-[20rem] w-[30rem] min-w-[30rem] overflow-y-scroll rounded-xl border border-black bg-white p-2 text-xs text-black opacity-50"
 				>
-					{props.pingResults.map((result: PingResult, index: number) => {
+					{props.lastPingResult && (
+						<div className="mb-3">
+							<div className="mb-2 flex items-center justify-center gap-3">
+								<p className="font-bold">{props.lastPingResult.time}</p>
+								<p>-</p>
+								<p>{props.lastPingResult.internalIP}</p>
+								<p>-</p>
+								<p className="font-bold">
+									{props.lastPingResult.success ? "Success" : "Error"}
+								</p>
+							</div>
+							<pre className="text-xs font-thin">
+								{props.lastPingResult.output}
+							</pre>
+						</div>
+					)}
+					{props.pingResults?.map((result: PingResult) => {
 						return (
-							<div key={result.time} className="mb-3">
+							<div key={result.output + Math.random()} className="mb-3">
 								<div className="mb-2 flex items-center justify-center gap-3">
 									<p className="font-bold">{result.time}</p>
 									<p>-</p>
