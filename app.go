@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"os/exec"
-	goruntime "runtime"
 	"strings"
 	"sync"
 	"time"
@@ -122,16 +120,6 @@ func (a *App) SendManualPing() {
 	runtime.EventsEmit(a.ctx, "pingResultManual", pingResult)
 }
 
-func preparePingCommand(internalIP string) *exec.Cmd {
-	os := goruntime.GOOS
-	if os == "windows" {
-		return exec.Command("ping", "-n", "1", "-w", "250", internalIP)
-	} else {
-		// unix
-		return exec.Command("ping", "-c", "1", "-W", "0.25", internalIP)
-	}
-}
-
 func (a *App) ping() PingResult {
 	if errorCount >= 5 {
 		a.ResetErrorCount()
@@ -146,7 +134,7 @@ func (a *App) ping() PingResult {
 		}
 	}
 
-	cmd := preparePingCommand(internalIP)
+	cmd := SendPing(internalIP)
 	out, err := cmd.Output()
 	output := string(out)
 

@@ -13,6 +13,12 @@ func configureCmd(cmd *exec.Cmd) {
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 }
 
+func SendPing(internalIP string) *exec.Cmd {
+	cmd := exec.Command("ping", "-n", "1", "-w", "250", internalIP)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	return cmd
+}
+
 var (
 	user32            = syscall.NewLazyDLL("user32.dll")
 	procFlashWindowEx = user32.NewProc("FlashWindowEx")
