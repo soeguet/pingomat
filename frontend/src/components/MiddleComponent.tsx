@@ -9,6 +9,7 @@ type MiddleComponentProps = {
 };
 function MiddleComponent(props: MiddleComponentProps) {
 	const [editIP, setEditIP] = useState(false);
+	const [manualPingCooldown, setManualPingCooldown] = useState(false);
 	function sendPing() {
 		SendManualPing();
 	}
@@ -24,8 +25,6 @@ function MiddleComponent(props: MiddleComponentProps) {
 				localStorage.setItem("pingomat-ip", props.ip);
 				SetInternalIP(props.ip);
 			}
-
-			console.log("CLOSE");
 			setEditIP(false);
 		} else {
 			setEditIP(true);

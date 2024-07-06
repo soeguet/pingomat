@@ -3,10 +3,10 @@ import { FailSvg } from "./svgs/FailSvg";
 import { SuccessSvg } from "./svgs/SuccessSvg";
 
 type StatusComponentProps = {
-	firstPingResult: PingResult | null;
+	lastPingResult: PingResult | null;
 };
 function StatusComponent(props: StatusComponentProps) {
-	const success: boolean | undefined = props.firstPingResult?.success;
+	const success: boolean | undefined = props.lastPingResult?.success;
 	return (
 		<>
 			<div

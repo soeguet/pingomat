@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
 	MakeWindowsTaskIconFlash,
+	ResetErrorCount,
 	SendDesktopNotification,
-	SendManualPing,
 	SetInternalIP,
 } from "../../wailsjs/go/main/App";
 import { EventsOn } from "../../wailsjs/runtime/runtime";
@@ -11,13 +11,19 @@ import { ResultComponent } from "./ResultComponent";
 import { StatusComponent } from "./StatusComponent";
 
 export interface PingResult {
+	errorCount: number;
 	time: string;
+	reset: boolean;
+	notification: boolean;
 	internalIP: string;
 	success: boolean;
 	output: string;
 }
 const examplePingResult: PingResult = {
+	errorCount: 0,
 	time: "00:00:00",
+	notification: false,
+	reset: false,
 	internalIP: "",
 	success: true,
 	output: "",
@@ -27,7 +33,6 @@ function PingComponent() {
 		examplePingResult,
 	]);
 	const [lastPingResult, setLastPingResult] = useState<PingResult | null>(null);
-	const [errorCount, setErrorCount] = useState(0);
 	const [ip, setIP] = useState(
 		localStorage.getItem("pingomat-ip") || "192.168.178.1",
 	);
@@ -36,69 +41,50 @@ function PingComponent() {
 	useEffect(() => {
 		SetInternalIP(ip);
 
-		console.log("errorcount", errorCount);
-		// regular 30 second interval ping
-		EventsOn("pingResult", (result: PingResult) => {
-			console.log("errorcount", errorCount);
+		EventsOn("pingResult", async (result: PingResult) => {
+			setLastPingResult(result);
+
 			if (!result.success) {
-				// if error, try again and increment error count
-				setErrorCount((prevErrorCount) => {
-					if (prevErrorCount < 5) {
-						SendManualPing();
-						return prevErrorCount + 1;
-					}
-
-					// after 5 errors, send desktop notification and flash taskbar icon
-					SendDesktopNotification(
-						"Ping Fehler",
-						"Das Gerät ist nicht erreichbar",
-					)
-						.then(() => {
-							MakeWindowsTaskIconFlash("pingomat");
-						})
-						.finally(() => {
-							// Optionally, you can reset the error count here if needed
-							// setErrorCount(0);
-						});
-					return prevErrorCount; // Do not increment further
-				});
-
-				setLastPingResult(result);
 				setPingResults((data) => {
-					if (data === null) {
+					if (data === null || data.length === 0) {
 						return [result];
 					}
+
 					const newData = [result, ...data];
 					if (newData.length > 1000) {
 						newData.pop();
 					}
 					return newData;
 				});
-			} else {
-				setLastPingResult(result);
-				setPingResults(null);
-				setErrorCount(0); // Reset error count on successful ping
+
+				if (result.notification) {
+					SendDesktopNotification(
+						"Ping Fehler",
+						"Das Gerät ist nicht erreichbar",
+					).then(() => {
+						MakeWindowsTaskIconFlash("pingomat");
+					});
+				}
+
+				return;
 			}
+
+			setPingResults(null);
 		});
 
-		EventsOn("pingResultManual", (result: PingResult) => {
-			setPingResults((data) => {
-				if (data === null) {
-					return [result];
-				}
-				const newData = [result, ...data];
-				if (newData.length > 1000) {
-					newData.pop();
-				}
-				return newData;
-			});
+		EventsOn("pingResultManual", async (result: PingResult) => {
+			setLastPingResult(result);
+
+			if (result.success) {
+				setPingResults(null);
+			}
 		});
 	}, []);
 
 	return (
 		<div className="container mx-auto flex flex-col gap-4 p-4">
 			<h1 className="text-2xl font-bold">Ping Ergebnisse</h1>
-			<StatusComponent firstPingResult={lastPingResult} />
+			<StatusComponent lastPingResult={lastPingResult} />
 			<MiddleComponent ip={ip} setIP={setIP} />
 			<ResultComponent
 				pingResults={pingResults}
