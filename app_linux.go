@@ -12,6 +12,11 @@ func SendPing(internalIP string) *exec.Cmd {
 	return cmd
 }
 
+func SendCurl(internalIP, internalPort string) *exec.Cmd {
+	cmd := exec.Command("curl", internalIP+":"+internalPort)
+	return cmd
+}
+
 func configureCmd(cmd *exec.Cmd) {
 	// no-op
 }

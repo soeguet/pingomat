@@ -9,7 +9,6 @@ type MiddleComponentProps = {
 };
 function MiddleComponent(props: MiddleComponentProps) {
 	const [editIP, setEditIP] = useState(false);
-	const [manualPingCooldown, setManualPingCooldown] = useState(false);
 	function sendPing() {
 		SendManualPing();
 	}
@@ -34,12 +33,12 @@ function MiddleComponent(props: MiddleComponentProps) {
 		<>
 			<div
 				id="ping-ip-container"
-				className="mb-6 flex items-center justify-center gap-2"
+				className="flex items-center justify-center gap-2"
 			>
 				{/* biome-ignore lint/a11y/useKeyWithClickEvents: no keyboard events needed */}
 				<div className="cursor-pointer" onClick={onClickIpChange}>
 					<div className="rounded-xl bg-white p-1">
-						<EditSvg />
+						<EditSvg title="Bearbeite die interne IP Adresse" />
 					</div>
 				</div>
 				<input

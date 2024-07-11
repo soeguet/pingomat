@@ -16,10 +16,11 @@ const (
 )
 
 var (
-	internalIP string = "192.168.178.1"
-	pingCount  int    = 30
-	errorCount int    = 0
-	mutex      sync.Mutex
+	internalIP   string = "192.168.178.1"
+	internalPort string = "80"
+	pingCount    int    = 30
+	errorCount   int    = 0
+	mutex        sync.Mutex
 )
 
 func (a *App) GetErrorCount() int {
@@ -56,6 +57,14 @@ func (a *App) SetInternalIP(newIP string) {
 
 func (a *App) GetInternalIP() string {
 	return internalIP
+}
+
+func (a *App) SetInternalPort(newPort string) {
+	internalPort = newPort
+}
+
+func (a *App) GetInternalPort() string {
+	return internalPort
 }
 
 // App struct
@@ -118,6 +127,15 @@ func (a *App) startPinging(ctx context.Context) {
 func (a *App) SendManualPing() {
 	pingResult := a.ping()
 	runtime.EventsEmit(a.ctx, "pingResultManual", pingResult)
+}
+
+func (a *App) SendManualCurl() {
+	a.curl()
+}
+
+func (a *App) curl() {
+	cmd := SendCurl(internalIP, internalPort)
+	_, _ = cmd.Output()
 }
 
 func (a *App) ping() PingResult {

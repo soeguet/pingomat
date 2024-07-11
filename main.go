@@ -19,7 +19,7 @@ func main() {
 	err := wails.Run(&options.App{
 		Title:         "pingomat",
 		Width:         700,
-		Height:        580,
+		Height:        600,
 		DisableResize: true,
 		AssetServer: &assetserver.Options{
 			Assets: assets,

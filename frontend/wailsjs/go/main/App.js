@@ -14,6 +14,10 @@ export function GetInternalIP() {
   return window['go']['main']['App']['GetInternalIP']();
 }
 
+export function GetInternalPort() {
+  return window['go']['main']['App']['GetInternalPort']();
+}
+
 export function GetPingCount() {
   return window['go']['main']['App']['GetPingCount']();
 }
@@ -34,12 +38,20 @@ export function SendDesktopNotification(arg1, arg2) {
   return window['go']['main']['App']['SendDesktopNotification'](arg1, arg2);
 }
 
+export function SendManualCurl() {
+  return window['go']['main']['App']['SendManualCurl']();
+}
+
 export function SendManualPing() {
   return window['go']['main']['App']['SendManualPing']();
 }
 
 export function SetInternalIP(arg1) {
   return window['go']['main']['App']['SetInternalIP'](arg1);
+}
+
+export function SetInternalPort(arg1) {
+  return window['go']['main']['App']['SetInternalPort'](arg1);
 }
 
 export function SetPingCount(arg1) {
