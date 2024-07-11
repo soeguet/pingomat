@@ -1,9 +1,7 @@
-import { SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	MakeWindowsTaskIconFlash,
 	SendDesktopNotification,
-	SetInternalIP,
-	SetInternalPort,
 	SendManualCurl,
 } from "../../wailsjs/go/main/App";
 import { EventsOn } from "../../wailsjs/runtime/runtime";
@@ -34,12 +32,6 @@ function MainComponent() {
 		examplePingResult,
 	]);
 	const [lastPingResult, setLastPingResult] = useState<PingResult | null>(null);
-	const [ip, setIP] = useState(
-		localStorage.getItem("pingomat-ip") || "192.168.178.1",
-	);
-	const [port, setPort] = useState(
-		localStorage.getItem("pingomat-port") || "80",
-	);
 
 	const [buttonCooldown, setButtonCooldown] = useState(false);
 
@@ -47,9 +39,6 @@ function MainComponent() {
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: should run only once
 	useEffect(() => {
-		SetInternalIP(ip);
-		SetInternalPort(port);
-
 		EventsOn("pingResult", async (result: PingResult) => {
 			setLastPingResult(result);
 
@@ -110,10 +99,6 @@ function MainComponent() {
 			<h1 className="text-2xl font-bold">Ping Ergebnisse</h1>
 			<StatusComponent lastPingResult={lastPingResult} />
 			<MiddleComponent
-				ip={ip}
-				setIP={setIP}
-				port={port}
-				setPort={setPort}
 				autoCurl={autoCurl}
 				setAutoCurl={setAutoCurl}
 				buttonCooldown={buttonCooldown}

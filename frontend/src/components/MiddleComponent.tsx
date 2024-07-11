@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
 	SendManualCurl,
 	SendManualPing,
 	SetInternalIP,
+	SetInternalPort,
 } from "../../wailsjs/go/main/App";
 import { EditSvg } from "./svgs/EditSvg";
 import { SendSvg } from "./svgs/SendSvg";
@@ -10,36 +11,25 @@ import { HttpSvg } from "./svgs/HttpSvg";
 import { validateIpRegex, validatePortRegex } from "./util/validator";
 
 type MiddleComponentProps = {
-	ip: string;
-	setIP: React.Dispatch<React.SetStateAction<string>>;
-	port: string;
-	setPort: React.Dispatch<React.SetStateAction<string>>;
 	buttonCooldown: boolean;
 	setButtonCooldown: React.Dispatch<React.SetStateAction<boolean>>;
 	autoCurl: boolean;
 	setAutoCurl: React.Dispatch<React.SetStateAction<boolean>>;
 };
+
 function MiddleComponent(props: MiddleComponentProps) {
 	const [editIP, setEditIP] = useState(false);
 	const [editPort, setEditPort] = useState(false);
 
-	function sendPing() {
-		SendManualPing();
-	}
+	const ipRef = useRef<HTMLInputElement>(null);
+	const portRef = useRef<HTMLInputElement>(null);
 
-	function onClickIpChange() {
-		if (editIP) {
-			const ipPass = validateIpRegex(props.ip);
-
-			if (ipPass) {
-				localStorage.setItem("pingomat-ip", props.ip);
-				SetInternalIP(props.ip);
-			}
-			setEditIP(false);
-		} else {
-			setEditIP(true);
-		}
-	}
+	// const [ip, setIP] = useState(
+	// 	localStorage.getItem("pingomat-ip") || "192.168.178.1",
+	// );
+	// const [port, setPort] = useState(
+	// 	localStorage.getItem("pingomat-port") || "80",
+	// );
 
 	function sendCurl() {
 		if (props.buttonCooldown) {
@@ -59,19 +49,47 @@ function MiddleComponent(props: MiddleComponentProps) {
 		SendManualCurl();
 	}
 
+	function onClickIpChange() {
+		if (editIP && ipRef.current) {
+			const ipPass = validateIpRegex(ipRef.current.value);
+
+			if (ipPass) {
+				SetInternalIP(ipRef.current.value);
+			}
+
+			setEditIP(false);
+		} else {
+			setEditIP(true);
+		}
+	}
 	function onClickPortChange() {
-		if (editPort) {
-			const portPass = validatePortRegex(props.port);
+		if (editPort && portRef.current) {
+			const portPass = validatePortRegex(portRef.current.value);
+			setEditPort(false);
 
 			if (portPass) {
-				localStorage.setItem("pingomat-port", props.port);
-				SetInternalIP(props.port);
+				SetInternalPort(portRef.current.value);
 			}
-			setEditPort(false);
+			setEditPort(true);
 		} else {
 			setEditPort(true);
 		}
 	}
+
+	useEffect(() => {
+		const ip = localStorage.getItem("pingomat-ip");
+		const port = localStorage.getItem("pingomat-port");
+
+		if (ip && ipRef.current) {
+			SetInternalIP(ip);
+			ipRef.current.value = ip;
+		}
+
+		if (port && portRef.current) {
+			SetInternalPort(port);
+			portRef.current.value = port;
+		}
+	}, []);
 
 	return (
 		<>
@@ -88,23 +106,26 @@ function MiddleComponent(props: MiddleComponentProps) {
 				<div className="flex gap-2">
 					<input
 						id="ping-ip-field"
-						className="items-center rounded-xl py-2 w-44 text-center text-black disabled:opacity-50"
+						ref={ipRef}
+						className="w-44 items-center rounded-xl py-2 text-center text-black disabled:opacity-50"
 						disabled={!editIP}
-						onChange={(e) => props.setIP(e.target.value)}
-						value={props.ip}
 					/>
 					<input
 						id="ping-port-field"
-						className="items-center rounded-xl w-24 py-2 text-center text-black disabled:opacity-50"
+						ref={portRef}
+						className="w-24 items-center rounded-xl py-2 text-center text-black disabled:opacity-50"
 						disabled={!editIP}
-						onChange={(e) => props.setPort(e.target.value)}
-						value={props.port}
 					/>
 				</div>
 
 				{/* biome-ignore lint/a11y/useKeyWithClickEvents: no keyboard events needed */}
-				<div className="cursor-pointer" onClick={sendPing}>
-					<div className="rounded-xl bg-white border-2 border-yellow-500 px-5 py-1">
+				<div
+					className="cursor-pointer"
+					onClick={() => {
+						SendManualPing();
+					}}
+				>
+					<div className="rounded-xl border-2 border-yellow-500 bg-white px-5 py-1">
 						<SendSvg />
 					</div>
 				</div>
@@ -119,11 +140,11 @@ function MiddleComponent(props: MiddleComponentProps) {
 				</div>
 			</div>
 			{props.buttonCooldown ? (
-				<div className="opacity-80 text-gray-200">
+				<div className="text-gray-200 opacity-80">
 					Curl Anfrage wird durchgeführt..
 				</div>
 			) : (
-				<div className="flex gap-2 justify-center items-center">
+				<div className="flex items-center justify-center gap-2">
 					<input
 						id="ping-port-field"
 						type="checkbox"
