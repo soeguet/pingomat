@@ -1,10 +1,10 @@
 import "./App.css";
-import { PingComponent } from "./components/PingComponent";
+import { MainComponent } from "./components/MainComponent";
 
 function App() {
 	return (
 		<div id="App">
-			<PingComponent />
+			<MainComponent />
 		</div>
 	);
 }

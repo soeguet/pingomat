@@ -10,7 +10,6 @@ import { EventsOn } from "../../wailsjs/runtime/runtime";
 import { MiddleComponent } from "./MiddleComponent";
 import { ResultComponent } from "./ResultComponent";
 import { StatusComponent } from "./StatusComponent";
-import { CurlComponent } from "./CurlComponent";
 
 export interface PingResult {
 	errorCount: number;
@@ -30,7 +29,7 @@ const examplePingResult: PingResult = {
 	success: true,
 	output: "",
 };
-function PingComponent() {
+function MainComponent() {
 	const [pingResults, setPingResults] = useState<PingResult[] | null>([
 		examplePingResult,
 	]);
@@ -110,14 +109,15 @@ function PingComponent() {
 		<div className="container mx-auto flex flex-col gap-4 p-4">
 			<h1 className="text-2xl font-bold">Ping Ergebnisse</h1>
 			<StatusComponent lastPingResult={lastPingResult} />
-			<MiddleComponent ip={ip} setIP={setIP} />
-			<CurlComponent
-				buttonCooldown={buttonCooldown}
-				setButtonCooldown={setButtonCooldown}
+			<MiddleComponent
+				ip={ip}
+				setIP={setIP}
 				port={port}
 				setPort={setPort}
 				autoCurl={autoCurl}
 				setAutoCurl={setAutoCurl}
+				buttonCooldown={buttonCooldown}
+				setButtonCooldown={setButtonCooldown}
 			/>
 			<ResultComponent
 				pingResults={pingResults}
@@ -127,4 +127,4 @@ function PingComponent() {
 	);
 }
 
-export { PingComponent };
+export { MainComponent };

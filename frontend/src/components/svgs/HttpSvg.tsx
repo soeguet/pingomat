@@ -14,7 +14,7 @@ function HttpSvg() {
 					cy={256}
 					r={256}
 					style={{
-						fill: "#32bea6",
+						fill: "#EAB308",
 					}}
 				/>
 				<path

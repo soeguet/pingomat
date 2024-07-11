@@ -1,4 +1,4 @@
-import type { PingResult } from "./PingComponent";
+import type { PingResult } from "./MainComponent";
 import { FailSvg } from "./svgs/FailSvg";
 import { SuccessSvg } from "./svgs/SuccessSvg";
 
