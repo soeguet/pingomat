@@ -20,11 +20,26 @@ var (
 	internalPort string = "80"
 	pingCount    int    = 30
 	errorCount   int    = 0
+	autoCurl     bool   = true
 	mutex        sync.Mutex
 )
 
+func (a *App) GetAutoCurl() bool {
+	return autoCurl
+}
+
+func (a *App) SetAutoCurl(newAutoCurl bool) {
+	autoCurl = newAutoCurl
+}
+
 func (a *App) GetErrorCount() int {
 	return errorCount
+}
+
+func (a *App) EvalAutoCurl() {
+	if autoCurl {
+		a.curl()
+	}
 }
 
 func (a *App) ErrorCountLessThanFive() bool {

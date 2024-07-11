@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import {
+	EvalAutoCurl,
+	GetAutoCurl,
 	MakeWindowsTaskIconFlash,
 	SendDesktopNotification,
 	SendManualCurl,
@@ -35,9 +37,7 @@ function MainComponent() {
 
 	const [buttonCooldown, setButtonCooldown] = useState(false);
 
-	const [autoCurl, setAutoCurl] = useState(true);
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: should run only once
+	// CAVE: state will not be updated since this function will always use the first render state!
 	useEffect(() => {
 		EventsOn("pingResult", async (result: PingResult) => {
 			setLastPingResult(result);
@@ -64,9 +64,15 @@ function MainComponent() {
 							MakeWindowsTaskIconFlash("pingomat");
 						})
 						.then(() => {
-							if (autoCurl) {
-								SendManualCurl();
-								setButtonCooldown(true);
+							GetAutoCurl().then(async (autoCurl) => {
+								console.log("autocurl status: ", autoCurl);
+
+								if (!autoCurl) {
+									return;
+								}
+
+								setButtonCooldown(autoCurl);
+								await EvalAutoCurl();
 
 								const timeout = setTimeout(() => {
 									setButtonCooldown(false);
@@ -74,8 +80,8 @@ function MainComponent() {
 									return () => {
 										clearTimeout(timeout);
 									};
-								}, 15000);
-							}
+								}, 5000);
+							});
 						});
 				}
 
@@ -99,8 +105,6 @@ function MainComponent() {
 			<h1 className="text-2xl font-bold">Ping Ergebnisse</h1>
 			<StatusComponent lastPingResult={lastPingResult} />
 			<MiddleComponent
-				autoCurl={autoCurl}
-				setAutoCurl={setAutoCurl}
 				buttonCooldown={buttonCooldown}
 				setButtonCooldown={setButtonCooldown}
 			/>

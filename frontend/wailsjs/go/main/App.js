@@ -6,6 +6,14 @@ export function ErrorCountLessThanFive() {
   return window['go']['main']['App']['ErrorCountLessThanFive']();
 }
 
+export function EvalAutoCurl() {
+  return window['go']['main']['App']['EvalAutoCurl']();
+}
+
+export function GetAutoCurl() {
+  return window['go']['main']['App']['GetAutoCurl']();
+}
+
 export function GetErrorCount() {
   return window['go']['main']['App']['GetErrorCount']();
 }
@@ -44,6 +52,10 @@ export function SendManualCurl() {
 
 export function SendManualPing() {
   return window['go']['main']['App']['SendManualPing']();
+}
+
+export function SetAutoCurl(arg1) {
+  return window['go']['main']['App']['SetAutoCurl'](arg1);
 }
 
 export function SetInternalIP(arg1) {

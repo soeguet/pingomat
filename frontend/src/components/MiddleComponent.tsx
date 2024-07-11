@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import {
+	GetInternalPort,
 	SendManualCurl,
 	SendManualPing,
+	SetAutoCurl,
 	SetInternalIP,
 	SetInternalPort,
 } from "../../wailsjs/go/main/App";
@@ -13,8 +15,6 @@ import { validateIpRegex, validatePortRegex } from "./util/validator";
 type MiddleComponentProps = {
 	buttonCooldown: boolean;
 	setButtonCooldown: React.Dispatch<React.SetStateAction<boolean>>;
-	autoCurl: boolean;
-	setAutoCurl: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 function MiddleComponent(props: MiddleComponentProps) {
@@ -24,12 +24,7 @@ function MiddleComponent(props: MiddleComponentProps) {
 	const ipRef = useRef<HTMLInputElement>(null);
 	const portRef = useRef<HTMLInputElement>(null);
 
-	// const [ip, setIP] = useState(
-	// 	localStorage.getItem("pingomat-ip") || "192.168.178.1",
-	// );
-	// const [port, setPort] = useState(
-	// 	localStorage.getItem("pingomat-port") || "80",
-	// );
+	const [portAtBackend, setPortAtBackend] = useState("");
 
 	function sendCurl() {
 		if (props.buttonCooldown) {
@@ -38,13 +33,17 @@ function MiddleComponent(props: MiddleComponentProps) {
 
 		props.setButtonCooldown(true);
 
+		GetInternalPort().then((port) => {
+			setPortAtBackend(port);
+		});
+
 		const timeout = setTimeout(() => {
 			props.setButtonCooldown(false);
 
 			return () => {
 				clearTimeout(timeout);
 			};
-		}, 15000);
+		}, 1000);
 
 		SendManualCurl();
 	}
@@ -98,9 +97,15 @@ function MiddleComponent(props: MiddleComponentProps) {
 				className="flex items-center justify-center gap-2"
 			>
 				{/* biome-ignore lint/a11y/useKeyWithClickEvents: no keyboard events needed */}
-				<div className="cursor-pointer" onClick={onClickIpChange}>
+				<div
+					className="cursor-pointer"
+					onClick={() => {
+						onClickIpChange();
+						onClickPortChange();
+					}}
+				>
 					<div className="rounded-xl bg-white p-1">
-						<EditSvg title="Bearbeite die interne IP Adresse" />
+						<EditSvg title="Bearbeite die interne IP Adresse sowie den angesteuerten Port" />
 					</div>
 				</div>
 				<div className="flex gap-2">
@@ -140,21 +145,22 @@ function MiddleComponent(props: MiddleComponentProps) {
 				</div>
 			</div>
 			{props.buttonCooldown ? (
-				<div className="text-gray-200 opacity-80">
-					Curl Anfrage wird durchgeführt..
-				</div>
+				<>
+					<div className="text-gray-200 opacity-80">
+						{`Curl Anfrage wird durchgeführt.. Port: ${portAtBackend}`}
+					</div>
+				</>
 			) : (
 				<div className="flex items-center justify-center gap-2">
 					<input
 						id="ping-port-field"
 						type="checkbox"
 						className="items-center rounded-xl py-2 text-center text-black disabled:opacity-50"
-						onChange={(e) => props.setAutoCurl(e.target.checked)}
-						checked={props.autoCurl}
+						onChange={(e) => SetAutoCurl(e.target.checked)}
 					/>
 					<label htmlFor="ping-port-field">
 						automatisch den Curl Befehl ausführen
-					</label>{" "}
+					</label>
 				</div>
 			)}
 		</>
