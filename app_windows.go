@@ -20,6 +20,7 @@ func SendPing(internalIP string) *exec.Cmd {
 }
 func SendCurl(internalIP, internalPort string) *exec.Cmd {
 	cmd := exec.Command("curl", internalIP+":"+internalPort)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	return cmd
 }
 
