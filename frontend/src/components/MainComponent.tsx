@@ -65,8 +65,6 @@ function MainComponent() {
 						})
 						.then(() => {
 							GetAutoCurl().then(async (autoCurl) => {
-								console.log("autocurl status: ", autoCurl);
-
 								if (!autoCurl) {
 									return;
 								}

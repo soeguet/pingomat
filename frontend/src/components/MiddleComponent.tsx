@@ -23,19 +23,16 @@ function MiddleComponent(props: MiddleComponentProps) {
 
 	const ipRef = useRef<HTMLInputElement>(null);
 	const portRef = useRef<HTMLInputElement>(null);
+	const autoCurlRef = useRef<HTMLInputElement>(null);
 
 	const [portAtBackend, setPortAtBackend] = useState("");
 
-	function sendCurl() {
+	async function sendCurl() {
 		if (props.buttonCooldown) {
 			return;
 		}
 
 		props.setButtonCooldown(true);
-
-		GetInternalPort().then((port) => {
-			setPortAtBackend(port);
-		});
 
 		const timeout = setTimeout(() => {
 			props.setButtonCooldown(false);
@@ -43,7 +40,7 @@ function MiddleComponent(props: MiddleComponentProps) {
 			return () => {
 				clearTimeout(timeout);
 			};
-		}, 1000);
+		}, 5000);
 
 		SendManualCurl();
 	}
@@ -54,6 +51,7 @@ function MiddleComponent(props: MiddleComponentProps) {
 
 			if (ipPass) {
 				SetInternalIP(ipRef.current.value);
+				localStorage.setItem("pingomat-ip", ipRef.current.value);
 			}
 
 			setEditIP(false);
@@ -68,6 +66,7 @@ function MiddleComponent(props: MiddleComponentProps) {
 
 			if (portPass) {
 				SetInternalPort(portRef.current.value);
+				localStorage.setItem("pingomat-port", portRef.current.value);
 			}
 			setEditPort(true);
 		} else {
@@ -78,6 +77,12 @@ function MiddleComponent(props: MiddleComponentProps) {
 	useEffect(() => {
 		const ip = localStorage.getItem("pingomat-ip");
 		const port = localStorage.getItem("pingomat-port");
+		const autoCurl = localStorage.getItem("pingomat-autocurl");
+
+		if (autoCurl && autoCurlRef.current) {
+			SetAutoCurl(autoCurl === "true");
+			autoCurlRef.current.checked = autoCurl === "true";
+		}
 
 		if (ip && ipRef.current) {
 			SetInternalIP(ip);
@@ -89,6 +94,13 @@ function MiddleComponent(props: MiddleComponentProps) {
 			portRef.current.value = port;
 		}
 	}, []);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: updates on cooldown for port number @backend
+	useEffect(() => {
+		GetInternalPort().then((port) => {
+			setPortAtBackend(port);
+		});
+	}, [props.buttonCooldown]);
 
 	return (
 		<>
@@ -137,7 +149,9 @@ function MiddleComponent(props: MiddleComponentProps) {
 				{/* biome-ignore lint/a11y/useKeyWithClickEvents: no keyboard events needed */}
 				<div
 					className={`${props.buttonCooldown ? "opacity-70" : "cursor-pointer"}`}
-					onClick={sendCurl}
+					onClick={async () => {
+						await sendCurl();
+					}}
 				>
 					<div className="rounded-xl bg-white px-3 py-1">
 						<HttpSvg />
@@ -154,9 +168,16 @@ function MiddleComponent(props: MiddleComponentProps) {
 				<div className="flex items-center justify-center gap-2">
 					<input
 						id="ping-port-field"
+						ref={autoCurlRef}
 						type="checkbox"
 						className="items-center rounded-xl py-2 text-center text-black disabled:opacity-50"
-						onChange={(e) => SetAutoCurl(e.target.checked)}
+						onChange={(e) => {
+							SetAutoCurl(e.target.checked);
+							localStorage.setItem(
+								"pingomat-autocurl",
+								e.target.checked.toString(),
+							);
+						}}
 					/>
 					<label htmlFor="ping-port-field">
 						automatisch den Curl Befehl ausführen
