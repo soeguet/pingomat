@@ -9,6 +9,7 @@
   "frontend:dev:serverUrl": "auto",
   "author": {
     "name": "soeguet",
-    "email": "osman_s@live.de"
+    "email": "osman_s@live.de",
+    "version":"2.0.1"
   }
 }

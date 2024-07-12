@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import {
+	EvalAutoCurl,
+	GetAutoCurl,
 	MakeWindowsTaskIconFlash,
-	ResetErrorCount,
 	SendDesktopNotification,
-	SetInternalIP,
+	SendManualCurl,
 } from "../../wailsjs/go/main/App";
 import { EventsOn } from "../../wailsjs/runtime/runtime";
 import { MiddleComponent } from "./MiddleComponent";
@@ -28,19 +29,16 @@ const examplePingResult: PingResult = {
 	success: true,
 	output: "",
 };
-function PingComponent() {
+function MainComponent() {
 	const [pingResults, setPingResults] = useState<PingResult[] | null>([
 		examplePingResult,
 	]);
 	const [lastPingResult, setLastPingResult] = useState<PingResult | null>(null);
-	const [ip, setIP] = useState(
-		localStorage.getItem("pingomat-ip") || "192.168.178.1",
-	);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: should run only once
+	const [buttonCooldown, setButtonCooldown] = useState(false);
+
+	// CAVE: state will not be updated since this function will always use the first render state!
 	useEffect(() => {
-		SetInternalIP(ip);
-
 		EventsOn("pingResult", async (result: PingResult) => {
 			setLastPingResult(result);
 
@@ -61,9 +59,28 @@ function PingComponent() {
 					SendDesktopNotification(
 						"Ping Fehler",
 						"Das Gerät ist nicht erreichbar",
-					).then(() => {
-						MakeWindowsTaskIconFlash("pingomat");
-					});
+					)
+						.then(() => {
+							MakeWindowsTaskIconFlash("pingomat");
+						})
+						.then(() => {
+							GetAutoCurl().then(async (autoCurl) => {
+								if (!autoCurl) {
+									return;
+								}
+
+								setButtonCooldown(autoCurl);
+								await EvalAutoCurl();
+
+								const timeout = setTimeout(() => {
+									setButtonCooldown(false);
+
+									return () => {
+										clearTimeout(timeout);
+									};
+								}, 5000);
+							});
+						});
 				}
 
 				return;
@@ -85,7 +102,10 @@ function PingComponent() {
 		<div className="container mx-auto flex flex-col gap-4 p-4">
 			<h1 className="text-2xl font-bold">Ping Ergebnisse</h1>
 			<StatusComponent lastPingResult={lastPingResult} />
-			<MiddleComponent ip={ip} setIP={setIP} />
+			<MiddleComponent
+				buttonCooldown={buttonCooldown}
+				setButtonCooldown={setButtonCooldown}
+			/>
 			<ResultComponent
 				pingResults={pingResults}
 				lastPingResult={lastPingResult}
@@ -94,4 +114,4 @@ function PingComponent() {
 	);
 }
 
-export { PingComponent };
+export { MainComponent };

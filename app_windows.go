@@ -18,6 +18,11 @@ func SendPing(internalIP string) *exec.Cmd {
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	return cmd
 }
+func SendCurl(internalIP, internalPort string) *exec.Cmd {
+	cmd := exec.Command("curl", internalIP+":"+internalPort)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	return cmd
+}
 
 var (
 	user32            = syscall.NewLazyDLL("user32.dll")

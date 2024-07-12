@@ -1,4 +1,4 @@
-import type { PingResult } from "./PingComponent";
+import type { PingResult } from "./MainComponent";
 
 type ResultComponentProps = {
 	pingResults: PingResult[] | null;
@@ -15,7 +15,7 @@ function ResultComponent(props: ResultComponentProps) {
 				>
 					{props.lastPingResult && (
 						<div
-							className="mb-3 rounded-xl bg-amber-300/20"
+							className="mb-3 rounded-xl bg-black/10 p-2"
 							id="last-ping-result"
 						>
 							<div className="mb-1 flex items-center justify-center gap-3">
@@ -23,8 +23,10 @@ function ResultComponent(props: ResultComponentProps) {
 								<p>-</p>
 								<p>{props.lastPingResult.internalIP}</p>
 								<p>-</p>
-								<p className="font-bold">
-									{props.lastPingResult.success ? "Success" : "Error"}
+								<p
+									className={`font-bold ${props.lastPingResult.success ? "text-green-500" : "text-red-600"}`}
+								>
+									{props.lastPingResult.success ? "Erfolgreich" : "Fehler"}
 								</p>
 							</div>
 							{!props.lastPingResult.success && (

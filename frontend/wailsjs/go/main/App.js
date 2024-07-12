@@ -6,12 +6,24 @@ export function ErrorCountLessThanFive() {
   return window['go']['main']['App']['ErrorCountLessThanFive']();
 }
 
+export function EvalAutoCurl() {
+  return window['go']['main']['App']['EvalAutoCurl']();
+}
+
+export function GetAutoCurl() {
+  return window['go']['main']['App']['GetAutoCurl']();
+}
+
 export function GetErrorCount() {
   return window['go']['main']['App']['GetErrorCount']();
 }
 
 export function GetInternalIP() {
   return window['go']['main']['App']['GetInternalIP']();
+}
+
+export function GetInternalPort() {
+  return window['go']['main']['App']['GetInternalPort']();
 }
 
 export function GetPingCount() {
@@ -34,12 +46,24 @@ export function SendDesktopNotification(arg1, arg2) {
   return window['go']['main']['App']['SendDesktopNotification'](arg1, arg2);
 }
 
+export function SendManualCurl() {
+  return window['go']['main']['App']['SendManualCurl']();
+}
+
 export function SendManualPing() {
   return window['go']['main']['App']['SendManualPing']();
 }
 
+export function SetAutoCurl(arg1) {
+  return window['go']['main']['App']['SetAutoCurl'](arg1);
+}
+
 export function SetInternalIP(arg1) {
   return window['go']['main']['App']['SetInternalIP'](arg1);
+}
+
+export function SetInternalPort(arg1) {
+  return window['go']['main']['App']['SetInternalPort'](arg1);
 }
 
 export function SetPingCount(arg1) {

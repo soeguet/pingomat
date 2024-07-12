@@ -1,4 +1,8 @@
-function EditSvg() {
+type EditSvgProps = {
+	title: string;
+};
+
+function EditSvg(props: EditSvgProps) {
 	return (
 		<>
 			<svg
@@ -8,7 +12,7 @@ function EditSvg() {
 				width="2em"
 				height="2em"
 			>
-				<title>Bearbeite die interne IP Adresse</title>
+				<title>{props.title}</title>
 				<rect
 					width={33.6}
 					height={33.6}
