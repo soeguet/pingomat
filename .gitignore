@@ -23,3 +23,6 @@ go.work.sum
 build
 frontend/dist
 frontend/node_modules
+.idea
+frontend/package-lock.json
+frontend/package.json.md5
