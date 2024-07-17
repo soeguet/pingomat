@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
+	GetAutoCurl,
 	GetInternalPort,
 	SendManualCurl,
 	SendManualPing,
@@ -42,15 +43,15 @@ function MiddleComponent(props: MiddleComponentProps) {
 			};
 		}, 5000);
 
-		SendManualCurl();
+		await SendManualCurl();
 	}
 
-	function onClickIpChange() {
+	async function onClickIpChange() {
 		if (editIP && ipRef.current) {
 			const ipPass = validateIpRegex(ipRef.current.value);
 
 			if (ipPass) {
-				SetInternalIP(ipRef.current.value);
+				await SetInternalIP(ipRef.current.value);
 				localStorage.setItem("pingomat-ip", ipRef.current.value);
 			}
 
@@ -59,13 +60,14 @@ function MiddleComponent(props: MiddleComponentProps) {
 			setEditIP(true);
 		}
 	}
-	function onClickPortChange() {
+
+	async function onClickPortChange() {
 		if (editPort && portRef.current) {
 			const portPass = validatePortRegex(portRef.current.value);
 			setEditPort(false);
 
 			if (portPass) {
-				SetInternalPort(portRef.current.value);
+				await SetInternalPort(portRef.current.value);
 				localStorage.setItem("pingomat-port", portRef.current.value);
 			}
 			setEditPort(true);
@@ -100,6 +102,12 @@ function MiddleComponent(props: MiddleComponentProps) {
 		GetInternalPort().then((port) => {
 			setPortAtBackend(port);
 		});
+
+		GetAutoCurl().then((autoCurl) => {
+			if (autoCurlRef.current) {
+				autoCurlRef.current.checked = autoCurl;
+			}
+		});
 	}, [props.buttonCooldown]);
 
 	return (
@@ -111,9 +119,9 @@ function MiddleComponent(props: MiddleComponentProps) {
 				{/* biome-ignore lint/a11y/useKeyWithClickEvents: no keyboard events needed */}
 				<div
 					className="cursor-pointer"
-					onClick={() => {
-						onClickIpChange();
-						onClickPortChange();
+					onClick={async () => {
+						await onClickIpChange();
+						await onClickPortChange();
 					}}
 				>
 					<div className="rounded-xl bg-white p-1">
@@ -138,8 +146,8 @@ function MiddleComponent(props: MiddleComponentProps) {
 				{/* biome-ignore lint/a11y/useKeyWithClickEvents: no keyboard events needed */}
 				<div
 					className="cursor-pointer"
-					onClick={() => {
-						SendManualPing();
+					onClick={async () => {
+						await SendManualPing();
 					}}
 				>
 					<div className="rounded-xl border-2 border-yellow-500 bg-white px-5 py-1">
@@ -171,8 +179,8 @@ function MiddleComponent(props: MiddleComponentProps) {
 						ref={autoCurlRef}
 						type="checkbox"
 						className="items-center rounded-xl py-2 text-center text-black disabled:opacity-50"
-						onChange={(e) => {
-							SetAutoCurl(e.target.checked);
+						onChange={async (e) => {
+							await SetAutoCurl(e.target.checked);
 							localStorage.setItem(
 								"pingomat-autocurl",
 								e.target.checked.toString(),
